@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include church_ministry *.css
+recursive-include church_ministry *.csv
+recursive-include church_ministry *.html
+recursive-include church_ministry *.ico
+recursive-include church_ministry *.js
+recursive-include church_ministry *.json
+recursive-include church_ministry *.md
+recursive-include church_ministry *.png
+recursive-include church_ministry *.py
+recursive-include church_ministry *.svg
+recursive-include church_ministry *.txt
+recursive-exclude church_ministry *.pyc

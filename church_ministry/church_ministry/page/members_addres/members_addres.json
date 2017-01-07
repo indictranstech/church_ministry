@@ -1,0 +1,21 @@
+{
+ "content": null, 
+ "creation": "2016-06-29 16:39:17.009676", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "modified": "2016-06-29 16:39:18.538046", 
+ "modified_by": "Administrator", 
+ "module": "Church Ministry", 
+ "name": "members-addres", 
+ "owner": "Administrator", 
+ "page_name": "members addres", 
+ "roles": [
+  {
+   "role": "All"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "Member Address on map"
+}

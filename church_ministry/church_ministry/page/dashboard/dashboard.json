@@ -1,0 +1,42 @@
+{
+ "content": null, 
+ "creation": "2015-02-23 15:47:39.767486", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "modified": "2015-03-12 11:42:39.103005", 
+ "modified_by": "Administrator", 
+ "module": "Church Ministry", 
+ "name": "dashboard", 
+ "owner": "Administrator", 
+ "page_name": "Dashboard", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "Regional Pastor"
+  }, 
+  {
+   "role": "Zonal Pastor"
+  }, 
+  {
+   "role": "Group Church Pastor"
+  }, 
+  {
+   "role": "Church Pastor"
+  }, 
+  {
+   "role": "PCF Leader"
+  }, 
+  {
+   "role": "Senior Cell Leader"
+  }, 
+  {
+   "role": "Cell Leader"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "Dashboard"
+}

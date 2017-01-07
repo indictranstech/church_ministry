@@ -1,0 +1,570 @@
+frappe.ui.form.on("Member", "onload", function(frm, dt, dn) {
+  if (frm.doc.email_id){
+    frm.doc.user_id=frm.doc.email_id
+  }
+  if(!frm.doc.__islocal){
+    set_field_permlevel('email_id',1);
+  }
+  else if(frm.doc.__islocal){
+    argmnt={
+             
+            }
+    if  (frm.doc.senior_cell){
+          argmnt={
+              "senior_cell": frm.doc.senior_cell, 
+            }
+    }
+    else if  (frm.doc.pcf){
+          argmnt={
+              "pcf": frm.doc.pcf, 
+            }
+    }
+
+    else if  (frm.doc.church){
+          argmnt={
+              "church": frm.doc.church, 
+            }
+    }
+
+    else if  (frm.doc.church_group){
+          argmnt={
+              "church_group": frm.doc.church_group, 
+            }
+    }
+    else if  (frm.doc.zone){
+          argmnt={
+              "zone": frm.doc.zone, 
+            }
+    }
+    else if  (frm.doc.region){
+          argmnt={
+              "region": frm.doc.region, 
+            }
+    }
+
+    else if  (frm.doc.cell){
+          argmnt={
+              "name": frm.doc.cell, 
+            }
+    }
+ 
+    frappe.call({
+        method:"church_ministry.church_ministry.doctype.first_timer.first_timer.set_higher_values",
+        args:{"args":argmnt},
+        callback: function(r) {
+          if (r.message){
+            for (var key in r.message) {
+                    cur_frm.set_value(key,r.message[key])                 
+                    refresh_field(key)
+                  }            
+            }
+          }
+    });
+  }
+
+  if(!frm.doc.__islocal && (frm.doc.address)){
+    $( "#map-canvas" ).remove();
+    $(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
+      cur_frm.cscript.address(frm.doc,frm.dt,frm.dn);
+    }
+   //  office address map div
+  
+  if(!frm.doc.__islocal && (frm.doc.office_address)){
+    $( "#map-canvas1" ).remove();
+    $(cur_frm.get_field("office_address").wrapper).append('<div id="map-canvas1" style="width: 425px; height: 425px;"></div>');
+      cur_frm.cscript.office_address(frm.doc,frm.dt,frm.dn);
+    }
+
+  if (in_list(user_roles, "Cell Leader")){
+    set_field_permlevel('cell',1);
+    set_field_permlevel('senior_cell',1);
+    set_field_permlevel('church',1);
+    set_field_permlevel('church_group',1);
+    set_field_permlevel('pcf',1);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+    set_field_permlevel('user_id',1);
+  }
+  else if(in_list(user_roles, "Senior Cell Leader")){
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',1);
+    set_field_permlevel('church',1);
+    set_field_permlevel('church_group',1);
+    set_field_permlevel('pcf',1);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+  }
+  else if(in_list(user_roles, "PCF Leader")){
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',0);
+    set_field_permlevel('pcf',1);
+    set_field_permlevel('church',1);
+    set_field_permlevel('church_group',1);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+  }
+  else if(in_list(user_roles, "Church Pastor")){
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',0);
+    set_field_permlevel('pcf',0);
+    set_field_permlevel('church',1);
+    set_field_permlevel('church_group',1);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+  }
+  else if(in_list(user_roles, "Group Church Pastor")){
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',0);
+    set_field_permlevel('pcf',0);
+    set_field_permlevel('church',0);
+    set_field_permlevel('church_group',1);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+  }
+  else if(in_list(user_roles, "Zonal Pastor")){
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',0);
+    set_field_permlevel('pcf',0);
+    set_field_permlevel('church',0);
+    set_field_permlevel('church_group',0);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+  }
+  else if(in_list(user_roles, "Regional Pastor")){
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',0);
+    set_field_permlevel('pcf',0);
+    set_field_permlevel('church',0);
+    set_field_permlevel('church_group',0);
+    set_field_permlevel('zone',0);
+    set_field_permlevel('region',1);
+  } 
+  else if(in_list(user_roles, "Welfare user")){
+    set_field_permlevel('membership_information',1);
+    set_field_permlevel('foundation_school__baptism_details',1);
+  }
+  else if(in_list(user_roles, "Member")){
+    set_field_permlevel('cell',1);
+    set_field_permlevel('senior_cell',1);
+    set_field_permlevel('pcf',1);
+    set_field_permlevel('church',1);
+    set_field_permlevel('church_group',1);
+    set_field_permlevel('zone',1);
+    set_field_permlevel('region',1);
+    set_field_permlevel('is_eligibale_for_follow_up',1);
+    set_field_permlevel('member_designation',1)
+  } 
+});
+
+
+frappe.ui.form.on("Member", "member_designation", function(frm, dt, dn) {
+roleshr={
+  "PCF Leader":"Member,Cell Leader,Sr.Cell Leader",
+  "Senior Cell Leader":"Member,Cell Leader",
+  "Cell Leader":"Member"
+}
+
+if(in_list(user_roles, "PCF Leader")){
+var desigarray=roleshr['PCF Leader'].split(",")
+var inarry=desigarray.indexOf(frm.doc.member_designation)
+if (parseInt(inarry) < 0){
+  alert ("You have not permitted to select the designation "+frm.doc.member_designation);
+  cur_frm.set_value("member_designation","Member")                 
+  refresh_field("member_designation");
+} 
+}
+
+if(in_list(user_roles, "Senior Cell Leader")){
+var desigarray=roleshr['Senior Cell Leader'].split(",")
+var inarry=desigarray.indexOf(frm.doc.member_designation)
+if (parseInt(inarry) < 0){
+  alert ("You have not permitted to select the designation "+frm.doc.member_designation);
+  cur_frm.set_value("member_designation","Member")                 
+  refresh_field("member_designation");
+}  
+}
+
+if(in_list(user_roles, "Cell Leader")){
+var desigarray=roleshr['Cell Leader'].split(",")
+var inarry=desigarray.indexOf(frm.doc.member_designation)
+if (parseInt(inarry) < 0){
+  cur_frm.set_value("member_designation","Member");                 
+  refresh_field("member_designation");
+  alert ("You have not permitted to select the designation "+frm.doc.member_designation);  
+}    
+}
+
+});
+
+cur_frm.add_fetch("cell", "pcf", "pcf");
+cur_frm.add_fetch("cell", "pcf_name", "pcf_name");
+cur_frm.add_fetch("cell", "church", "church");
+cur_frm.add_fetch("cell", "church_name", "church_name");
+cur_frm.add_fetch("cell", "church_group", "church_group");
+cur_frm.add_fetch("cell", "group_church_name", "group_church_name");
+cur_frm.add_fetch("cell", "region", "region");
+cur_frm.add_fetch("cell", "region_name", "region_name");
+cur_frm.add_fetch("cell", "zone", "zone");
+cur_frm.add_fetch("cell", "zone_name", "zone_name");
+cur_frm.add_fetch("cell", "senior_cell", "senior_cell");
+cur_frm.add_fetch("cell", "senior_cell_name", "senior_cell_name");
+
+cur_frm.add_fetch("senior_cell", "pcf", "pcf");
+cur_frm.add_fetch("senior_cell", "church", "church");
+cur_frm.add_fetch("senior_cell", "church_group", "church_group");
+cur_frm.add_fetch("senior_cell", "region", "region");
+cur_frm.add_fetch("senior_cell", "zone", "zone");
+cur_frm.add_fetch("senior_cell", "pcf_name", "pcf_name");
+cur_frm.add_fetch("senior_cell", "church_name", "church_name");
+cur_frm.add_fetch("senior_cell", "group_church_name", "group_church_name");
+cur_frm.add_fetch("senior_cell", "region_name", "region_name");
+cur_frm.add_fetch("senior_cell", "zone_name", "zone_name");
+
+
+cur_frm.add_fetch("pcf", "church", "church");
+cur_frm.add_fetch("pcf", "church_group", "church_group");
+cur_frm.add_fetch("pcf", "region", "region");
+cur_frm.add_fetch("pcf", "zone", "zone");
+cur_frm.add_fetch("pcf", "church_name", "church_name");
+cur_frm.add_fetch("pcf", "group_church_name", "group_church_name");
+cur_frm.add_fetch("pcf", "region_name", "region_name");
+cur_frm.add_fetch("pcf", "zone_name", "zone_name");
+
+cur_frm.add_fetch("church", "church_group", "church_group");
+cur_frm.add_fetch("church", "region", "region");
+cur_frm.add_fetch("church", "zone", "zone");
+cur_frm.add_fetch("church", "group_church_name", "group_church_name");
+cur_frm.add_fetch("church", "region_name", "region_name");
+cur_frm.add_fetch("church", "zone_name", "zone_name");
+
+cur_frm.add_fetch("church_group", "region", "region");
+cur_frm.add_fetch("church_group", "zone", "zone");
+cur_frm.add_fetch("church_group", "region_name", "region_name");
+cur_frm.add_fetch("church_group", "zone_name", "zone_name");
+
+cur_frm.add_fetch("zone", "region", "region");
+cur_frm.add_fetch("zone", "zone_name", "zone_name");
+
+cur_frm.fields_dict['user_id'].get_query = function(doc) {
+  return "select name from `tabUser` where name not in (select distinct parent from `tabDefaultValue` where parenttype not in ('__default','null')) and name not in ('Guest','Administrator')"
+}
+
+cur_frm.fields_dict['cell'].get_query = function(doc) {
+  return {
+    query:'church_ministry.church_ministry.doctype.member.member.get_list',
+    filters :{
+      'doctype':'Cells',
+      'senior_cell' : doc.senior_cell,
+      'pcf' : doc.pcf,
+      'church' : doc.church,
+      'church_group' : doc.church_group,
+      'zone' : doc.zone,
+      'region' : doc.region
+    }
+  }
+}
+
+cur_frm.fields_dict['senior_cell'].get_query = function(doc) {
+  return {
+    query:'church_ministry.church_ministry.doctype.member.member.get_list',
+    filters :{
+      'doctype':'Senior Cells',
+      'pcf' : doc.pcf,
+      'church' : doc.church,
+      'church_group' : doc.church_group,
+      'zone' : doc.zone,
+      'region' : doc.region
+    }
+  }
+}
+
+cur_frm.fields_dict['pcf'].get_query = function(doc) {
+  return {
+    query:'church_ministry.church_ministry.doctype.member.member.get_list',
+    filters :{
+      'doctype':'PCFs',
+      'church' : doc.church,
+      'church_group' : doc.church_group,
+      'zone' : doc.zone,
+      'region' : doc.region
+    }
+  }
+}
+
+cur_frm.fields_dict['church'].get_query = function(doc) {
+  return {
+    query:'church_ministry.church_ministry.doctype.member.member.get_list',
+    filters :{
+      'doctype':'Churches',
+      'church_group' : doc.church_group,
+      'zone' : doc.zone,
+      'region' : doc.region
+    }
+  }
+}
+cur_frm.fields_dict['church_group'].get_query = function(doc) {
+  return {
+    query:'church_ministry.church_ministry.doctype.member.member.get_list',
+    filters :{
+      'doctype':'Group Churches',
+      'zone' : doc.zone,
+      'region' : doc.region
+    }
+  }
+}
+
+cur_frm.fields_dict['zone'].get_query = function(doc) {
+  return {
+    query:'church_ministry.church_ministry.doctype.member.member.get_list',
+    filters :{
+      'doctype':'Zones',
+      'region' : doc.region
+    }
+  }
+}
+
+cur_frm.cscript.create_pin_on_map=function(doc,lat,lon){
+        var latLng = new google.maps.LatLng(lat, lon);
+        var map = new google.maps.Map(document.getElementById('map-canvas'), {
+            zoom: 16,
+            center: latLng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          });
+        var marker = new google.maps.Marker({
+            position: latLng,
+            title: 'Point',
+            map: map,
+            draggable: true
+          });
+
+        updateMarkerPosition(latLng);
+        geocodePosition(latLng);
+
+        google.maps.event.addListener(marker, 'dragstart', function() {
+            updateMarkerAddress('Dragging...');
+        });
+
+        google.maps.event.addListener(marker, 'drag', function() {
+            updateMarkerStatus('Dragging...');
+            updateMarkerPosition(marker.getPosition());
+        });
+
+        google.maps.event.addListener(marker, 'dragend', function() {
+            updateMarkerStatus('Drag ended');
+            geocodePosition(marker.getPosition());
+          });
+}
+
+function geocodePosition(pos) {
+      geocoder.geocode({
+        latLng: pos
+      }, function(responses) {
+        if (responses && responses.length > 0) {
+          updateMarkerAddress(responses[0].formatted_address);
+        } else {
+          if(doc.__islocal) {
+            alert('Cannot determine address at this location.');
+          }
+        }
+      });
+      geocoder.geocode( { 'address': doc.address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        doc.lat=results[0].geometry.location.lat();
+        doc.lon=results[0].geometry.location.lng();
+        refresh_field('lat')
+        refresh_field('lon')
+      } 
+    });
+}
+
+function updateMarkerAddress(str) {
+  doc=cur_frm.doc
+  doc.address= str;
+  refresh_field('address');
+}
+
+function updateMarkerStatus(str) {
+var s=1;
+}
+
+function updateMarkerPosition(latLng) {
+  doc=cur_frm.doc
+  doc.lat=latLng.lat()
+  doc.lon=latLng.lng()
+  refresh_field('lat')
+  refresh_field('lon')
+}
+
+var geocoder = new google.maps.Geocoder();
+
+
+var getMarkerUniqueId= function(lat, lng) {
+    return lat + '_' + lng;
+}
+
+var getLatLng = function(lat, lng) {
+     return new google.maps.LatLng(lat, lng);
+};
+
+cur_frm.cscript.address = function(doc, dt, dn){
+      
+      geocoder.geocode( { 'address': doc.address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+          doc.address=results[0].formatted_address;
+          refresh_field('address');
+          var latLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+          if (doc.address) {
+            //alert("is address");
+            $( "#map-canvas" ).remove();
+            $(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
+          }
+          var map = new google.maps.Map(document.getElementById('map-canvas'), {
+              zoom: 16,
+              center: latLng,
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+
+          var marker = new google.maps.Marker({
+              position: latLng,
+              title: 'Point',
+              map: map,
+              draggable: true
+            });
+          updateMarkerPosition(latLng);
+          geocodePosition(latLng);
+
+          google.maps.event.addListener(marker, 'dragend', function() {
+              geocodePosition(marker.getPosition());
+          });
+      } else {
+        $( "#map-canvas" ).remove();
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    });
+}
+
+//  office address maps code
+
+
+cur_frm.cscript.create_pin_on_map1=function(doc,lat1,lon1){
+        var latLng1 = new google.maps.LatLng(lat1, lon1);
+
+        var map1 = new google.maps.Map(document.getElementById('map-canvas1'), {
+            zoom: 14,
+            center: latLng1,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          });
+        var marker1 = new google.maps.Marker({
+            position: latLng1,
+            title: 'Point',
+            map: map1,
+            draggable: true
+          });
+
+        updateMarkerPosition1(latLng1);
+        geocodePosition1(latLng1);
+
+        google.maps.event.addListener(marker1, 'dragstart', function() {
+            updateMarkerAddress1('Dragging...');
+        });
+
+        google.maps.event.addListener(marker1, 'drag', function() {
+            updateMarkerStatus1('Dragging...');
+            updateMarkerPosition1(marker1.getPosition());
+        });
+
+        google.maps.event.addListener(marker1, 'dragend', function() {
+            updateMarkerStatus1('Drag ended');
+            geocodePosition1(marker1.getPosition());
+          });
+}
+
+
+var geocoder1 = new google.maps.Geocoder();
+function geocodePosition1(pos1) {
+      geocoder1.geocode({
+        latLng: pos1
+      }, function(responses) {
+        if (responses && responses.length > 0) {
+          updateMarkerAddress1(responses[0].formatted_address);
+        } else {
+          if(doc.__islocal) {
+            alert('Cannot determine address at this location.');
+          }
+        }
+      });
+      geocoder1.geocode( { 'address': doc.office_address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        doc.lat1=results[0].geometry.location.lat();
+        doc.lon1=results[0].geometry.location.lng();
+        refresh_field('lat1')
+        refresh_field('lon1')
+      } 
+    });
+}
+
+function updateMarkerAddress1(str1) {
+  doc=cur_frm.doc
+  doc.office_address= str1;
+  refresh_field('office_address');
+}
+
+function updateMarkerStatus1(str1) {
+var s=1;
+}
+
+function updateMarkerPosition1(latLng1) {
+  doc=cur_frm.doc
+  doc.lat1=latLng1.lat()
+  doc.lon1=latLng1.lng()
+  refresh_field('lat1')
+  refresh_field('lon1')
+}
+
+
+var getMarkerUniqueId1= function(lat1, lng1) { 
+    return lat1 + '_' + lng1;
+}
+
+var getLatLng1 = function(lat1, lng1) {
+    return new google.maps.LatLng(lat1, lng1);
+};
+
+cur_frm.cscript.office_address = function(doc, dt, dn){
+      geocoder.geocode( { 'address': doc.office_address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+          doc.office_address=results[0].formatted_address;
+          refresh_field('office_address');
+          var latLng1 = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+          if (doc.office_address) {
+            //alert("is office_address");
+            $( "#map-canvas1" ).remove();
+            $(cur_frm.get_field("office_address").wrapper).append('<div id="map-canvas1" style="width: 425px; height: 425px;"></div>');
+          }
+          var map1 = new google.maps.Map(document.getElementById('map-canvas1'), {
+              zoom: 14,
+              center: latLng1,
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+
+          var marker1 = new google.maps.Marker({
+              position: latLng1,
+              title: 'Point',
+              map: map1,
+              draggable: true
+            });
+          updateMarkerPosition1(latLng1);
+          geocodePosition1(latLng1);
+
+          google.maps.event.addListener(marker1, 'dragend', function() {
+              geocodePosition1(marker1.getPosition());
+          });
+      } else {
+        $( "#map-canvas1" ).remove();
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    });
+}
+
+
+
