@@ -232,6 +232,7 @@ def user_roles(data):
 	Get user name and password from user and returns roles and its def key and defvalue
 	"""
 	dts=json.loads(data)
+	print "Dts :",dts,"\n"
 	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
 	valid=frappe.db.sql(qry)
 	if not valid:
@@ -305,6 +306,253 @@ def create_push_notification(device_id,username,userpass):
                 return "Successfully updated device id '"+obj.device_id+"'"
 
 
+
+
+@frappe.whitelist(allow_guest=True)
+def create_regions(data):
+	"""
+	Need to check validation/ duplication  etc
+
+	"""
+	dts=json.loads(data)
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	print "dataIn :",dts,"\n"
+	valid=frappe.db.sql(qry)
+	#print dts
+	if not valid:
+		return {
+		  "status":"401",
+		  "message":"User name or Password is incorrect"
+		}
+        if not frappe.has_permission(doctype="Regions", ptype="create",user=dts['username']):
+                return {
+                  "status":"403",
+                  "message":"You have no permission to create Regions"
+                }
+	else:
+		obj=frappe.new_doc("Regions")
+		obj.region=dts['region']
+		obj.region_name=dts['region']
+		obj.contact_phone_no=dts['contact_phone_no']
+		obj.contact_email_id=dts['contact_email_id']
+		obj.meeting_location=dts['meeting_location']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully created Regions '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
+
+
+@frappe.whitelist(allow_guest=True)
+def create_zones(data):
+	"""
+	Need to check validation/ duplication  etc
+
+	"""
+	dts=json.loads(data)
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	print "dataIn :",dts,"\n"
+	valid=frappe.db.sql(qry)
+	#print dts
+	if not valid:
+		return {
+		  "status":"401",
+		  "message":"User name or Password is incorrect"
+		}
+        if not frappe.has_permission(doctype="Zones", ptype="create",user=dts['username']):
+                return {
+                  "status":"403",
+                  "message":"You have no permission to create zones"
+                }
+	else:
+		obj=frappe.new_doc("Zones")
+		obj.zone=dts['zone_name']
+		obj.zone_name=dts['zone_name']
+		higher_details=frappe.db.sql("select region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
+	
+		obj.region=higher_details[0][1]
+		obj.region_name=higher_details[0][2]
+		obj.contact_phone_no=dts['contact_phone_no']
+		obj.contact_email_id=dts['contact_email_id']
+		obj.meeting_location=dts['meeting_location']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully created Zones '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def create_group_church(data):
+	"""
+	Need to check validation/ duplication  etc
+
+	"""
+	dts=json.loads(data)
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	print "dataIn :",dts,"\n"
+	valid=frappe.db.sql(qry)
+	#print dts
+	if not valid:
+		return {
+		  "status":"401",
+		  "message":"User name or Password is incorrect"
+		}
+        if not frappe.has_permission(doctype="Group Churches", ptype="create",user=dts['username']):
+                return {
+                  "status":"403",
+                  "message":"You have no permission to Group Churches"
+                }
+	else:
+		obj=frappe.new_doc("Group Churches")
+		obj.church_group=dts['church_group']
+		obj.group_church_name=dts['church_group']
+		
+		higher_details=frappe.db.sql("select zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
+		obj.zone=higher_details[0][1]
+		obj.zone_name=higher_details[0][2]
+		obj.region=higher_details[0][3]
+		obj.region_name=higher_details[0][4]
+		obj.contact_phone_no=dts['contact_phone_no']
+		obj.contact_email_id=dts['contact_email_id']
+		obj.meeting_location=dts['meeting_location']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully created Group Churches '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
+
+
+@frappe.whitelist(allow_guest=True)
+def create_church(data):
+	"""
+	Need to check validation/ duplication  etc
+
+	"""
+	dts=json.loads(data)
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	print "dataIn :",dts,"\n"
+	valid=frappe.db.sql(qry)
+	if not valid:
+		return {
+		  "status":"401",
+		  "message":"User name or Password is incorrect"
+		}
+        if not frappe.has_permission(doctype="Churches", ptype="create",user=dts['username']):
+                return {
+                  "status":"403",
+                  "message":"You have no permission to create churches"
+                }
+	else:
+		obj=frappe.new_doc("Churches")
+		obj.church_name=dts['church_name']
+		obj.church=dts['church_name']
+		higher_details=frappe.db.sql("select church_group,group_church_name,zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
+		obj.church_group=higher_details[0][1]
+		obj.group_church_name=higher_details[0][2]
+		obj.zone=higher_details[0][3]
+		obj.zone_name=higher_details[0][4]
+		obj.region=higher_details[0][5]
+		obj.region_name=higher_details[0][6]
+		obj.contact_phone_no=dts['contact_phone_no']
+		obj.contact_email_id=dts['contact_email_id']
+		obj.meeting_location=dts['meeting_location']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully created church '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
+
+
+
+@frappe.whitelist(allow_guest=True)
+def create_pcf(data):
+	"""
+	Need to check validation/ duplication  etc
+
+	"""
+	dts=json.loads(data)
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	valid=frappe.db.sql(qry)
+	print "dataIn :",dts,"\n"
+	if not valid:
+		return {
+		  "status":"401",
+		  "message":"User name or Password is incorrect"
+		}
+        if not frappe.has_permission(doctype="Cells", ptype="create",user=dts['username']):
+                return {
+                  "status":"403",
+                  "message":"You have no permission to create PCFs"
+                }
+	else:
+		obj=frappe.new_doc("PCFs")
+		obj.pcf_name=dts['pcf_name']
+		obj.pcf=dts['pcf_name']
+		obj.church=dts['church']
+		#return "select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church'])
+		higher_details=frappe.db.sql("select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church']))
+		obj.church_name=higher_details[0][0]
+		obj.church_group=higher_details[0][1]
+		obj.group_church_name=higher_details[0][2]
+		obj.zone=higher_details[0][3]
+		obj.zone_name=higher_details[0][4]
+		obj.region=higher_details[0][5]
+		obj.region_name=higher_details[0][6]
+		if 'contact_phone_no' in dts:
+			obj.contact_phone_no=dts['contact_phone_no']
+		if 'contact_email_id' in dts:
+			obj.contact_email_id=dts['contact_email_id']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully Created PCF '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
+
+	
+
 @frappe.whitelist(allow_guest=True)
 def create_senior_cells(data):
 	"""
@@ -313,8 +561,8 @@ def create_senior_cells(data):
 	"""
 	dts=json.loads(data)
 	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	print "dataIn :",dts,"\n"
 	valid=frappe.db.sql(qry)
-	#print dts
 	if not valid:
 		return {
 		  "status":"401",
@@ -328,8 +576,8 @@ def create_senior_cells(data):
 	else:
 		obj=frappe.new_doc("Senior Cells")
 		obj.senior_cell_name=dts['senior_cell_name']
-		#obj.senior_cell_code=dts['senior_cell_code']
-		obj.meeting_location=dts['meeting_location']
+		obj.senior_cell=dts['senior_cell_name'] 
+		
 		obj.pcf=dts['pcf']
 		higher_details=frappe.db.sql("select pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
 		obj.pcf_name=higher_details[0][0]
@@ -343,8 +591,78 @@ def create_senior_cells(data):
 		obj.region_name=higher_details[0][8]
 		obj.contact_phone_no=dts['contact_phone_no']
 		obj.contact_email_id=dts['contact_email_id']
-		obj.insert(ignore_permissions=True)
-		return "Successfully created senior Cell '"+obj.name+"'"
+		obj.meeting_location=dts['meeting_location']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully created senior Cell '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
+
+
+
+@frappe.whitelist(allow_guest=True)
+def create_cells(data):
+	"""
+	Need to check validation/ duplication  etc
+
+	"""
+	dts=json.loads(data)
+	print "dataIn :",dts,"\n"
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	valid=frappe.db.sql(qry)
+	if not valid:
+		return {
+		  "status":"401",
+		  "message":"User name or Password is incorrect"
+		}
+        if not frappe.has_permission(doctype="Cells", ptype="create",user=dts['username']):
+                return {
+                  "status":"403",
+                  "message":"You have no permission to create Cell"
+                }
+	else:
+		obj=frappe.new_doc("Cells")
+		obj.cell_name=dts['cell_name']
+		obj.cell_code=dts['cell_name']
+		
+		higher_details=frappe.db.sql("select senior_cell_name,pcf,pcf_name ,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name from `tabSenior Cells` where name='%s'"%(dts['senior_cell']))
+		obj.senior_cell=dts['senior_cell']
+		obj.senior_cell_name=higher_details[0][0]
+		obj.pcf=higher_details[0][1]
+		obj.pcf_name=higher_details[0][2]
+		obj.church=higher_details[0][3]
+		obj.church_name=higher_details[0][4]
+		obj.church_group=higher_details[0][5]
+		obj.group_church_name=higher_details[0][6]
+		obj.zone=higher_details[0][7]
+		obj.zone_name=higher_details[0][8]
+		obj.region=higher_details[0][9]
+		obj.region_name=higher_details[0][10]
+		obj.contact_phone_no=dts['contact_phone_no']
+		obj.contact_email_id=dts['contact_email_id']
+		obj.meeting_location=dts['meeting_location']
+		obj.address=dts['address']
+		try:
+			obj.insert(ignore_permissions=True)
+			return "Successfully created Cell '"+obj.name+"'"
+		except  :
+			msg=""
+			if frappe.local.message_log:
+				for d in frappe.local.message_log:
+					msg+= d +" "
+			rsp = json.dumps(msg)
+			return {
+		  		"status":"403",
+		  		"message":rsp
+			}
 		                
 
 @frappe.whitelist(allow_guest=True)
@@ -749,106 +1067,6 @@ def update_member(data):
 
 
 
-@frappe.whitelist(allow_guest=True)
-def create_cells(data):
-	"""
-	Need to check validation/ duplication  etc
-
-	"""
-	dts=json.loads(data)
-	#print dts
-	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
-	valid=frappe.db.sql(qry)
-	if not valid:
-		return {
-		  "status":"401",
-		  "message":"User name or Password is incorrect"
-		}
-        if not frappe.has_permission(doctype="Cells", ptype="create",user=dts['username']):
-                return {
-                  "status":"403",
-                  "message":"You have no permission to create Cell"
-                }
-	else:
-		obj=frappe.new_doc("Cells")
-		obj.cell_name=dts['cell_name']
-		#obj.cell_code=dts['cell_code']
-		obj.meeting_location=dts['meeting_location']
-		obj.address=dts['address']
-		higher_details=frappe.db.sql("select senior_cell_name,pcf,pcf_name ,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name from `tabSenior Cells` where name='%s'"%(dts['senior_cell']))
-		obj.senior_cell=dts['senior_cell']
-		obj.senior_cell_name=higher_details[0][0]
-		obj.pcf=higher_details[0][1]
-		obj.pcf_name=higher_details[0][2]
-		obj.church=higher_details[0][3]
-		obj.church_name=higher_details[0][4]
-		obj.church_group=higher_details[0][5]
-		obj.group_church_name=higher_details[0][6]
-		obj.zone=higher_details[0][7]
-		obj.zone_name=higher_details[0][8]
-		obj.region=higher_details[0][9]
-		obj.region_name=higher_details[0][10]
-		obj.contact_phone_no=dts['contact_phone_no']
-		obj.contact_email_id=dts['contact_email_id']
-		obj.insert(ignore_permissions=True)
-		ret={
-			"message":"Successfully created Cell '"+obj.name+"'"
-		}
-		return ret
-
-@frappe.whitelist(allow_guest=True)
-def create_pcf(data):
-	"""
-	Need to check validation/ duplication  etc
-
-	"""
-	dts=json.loads(data)
-	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
-	valid=frappe.db.sql(qry)
-	#print dts
-	if not valid:
-		return {
-		  "status":"401",
-		  "message":"User name or Password is incorrect"
-		}
-        if not frappe.has_permission(doctype="Cells", ptype="create",user=dts['username']):
-                return {
-                  "status":"403",
-                  "message":"You have no permission to create PCFs"
-                }
-	else:
-		obj=frappe.new_doc("PCFs")
-		obj.pcf_name=dts['pcf_name']
-		#obj.pcf_code=dts['pcf_code']
-		obj.church=dts['church']
-		#return "select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church'])
-		higher_details=frappe.db.sql("select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church']))
-		obj.church_name=higher_details[0][0]
-		obj.church_group=higher_details[0][1]
-		obj.group_church_name=higher_details[0][2]
-		obj.zone=higher_details[0][3]
-		obj.zone_name=higher_details[0][4]
-		obj.region=higher_details[0][5]
-		obj.region_name=higher_details[0][6]
-		if 'contact_phone_no' in dts:
-			obj.contact_phone_no=dts['contact_phone_no']
-		if 'contact_email_id' in dts:
-			obj.contact_email_id=dts['contact_email_id']
-		try:
-			obj.insert(ignore_permissions=True)
-			return "Successfully Created PCF '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
-			return {
-		  		"status":"403",
-		  		"message":rsp
-			}
-
-
 
 @frappe.whitelist(allow_guest=True)
 def create_event(data):
@@ -1090,43 +1308,51 @@ def meetings_list_new(data):
                   "message":"User name or Password is incorrect"
                 }
         else:
-		fltr_cnd=''
-    		fltrs=[]
-		if 'filters' in dts:
-   			if 'from_date' in dts['filters']:
-    		    		dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
-  			if 'to_date' in dts['filters']:
-    		    		dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]		      
-  			if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
-  	     			fltrs.append(" date(creation) >= '%s' and date(creation) <= '%s'" %(dts['filters']['from_date'],dts['filters']['to_date']))
-    			elif 'from_date' in dts['filters'] :
-    	        		fltrs.append(" date(creation) >= '%s' " %dts['filters']['from_date'])
-    	        
-    			elif 'to_date' in dts['filters'] :
-    	        		fltrs.append(" date(creation) <= '%s' " %dts['filters']['to_date'])    
-    			for key,value in dts['filters'].iteritems():
-    	 			if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
-    	       				fltrs.append(" %s = '%s' " %(key,value))
-			fltr_cnd=" and "+' and '.join([x for x in fltrs])               
-		match_conditions,cond=get_match_conditions('Attendance Record',dts['username'])   
-		if match_conditions : 
-			fltr_cnd+=cond
-			#return fltr_cnd
-		total_count= frappe.db.sql("select ifnull(count(name),0) from `tabAttendance Record` where attendance_type='Meeting Attendance' %s " %(fltr_cnd))
-		#return total_count
-    		if (('page_no' not in dts) or cint(dts['page_no'])<=1):  
-			dts['page_no']=1
-			start_index=0
-    		else:   
-			start_index=(cint(dts['page_no'])-1)*20
-    		end_index =start_index+20	
-    		if total_count[0][0]<=end_index:
-			end_index=total_count[0][0] 
-		result={}
-                result['total_count']=total_count[0][0]
-                result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
-		result['records']=frappe.db.sql("""select name as meeting_name,CASE meeting_category  WHEN 'Cell Meeting' THEN meeting_subject ELSE meeting_sub END  as meeting_subject , from_date as meeting_date,to_date as end_date ,venue from `tabAttendance Record` where attendance_type='Meeting Attendance'  %s order by name limit %s,20"""%(fltr_cnd,cint(start_index)), as_dict=1)
-                return result
+			fltr_cnd=''
+			fltrs=[]
+			if 'filters' in dts:
+				if 'from_date' in dts['filters']:
+					dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
+				if 'to_date' in dts['filters']:
+					dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]
+				if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
+					fltrs.append(" date(creation) >= '%s' and date(creation) <= '%s'" %(dts['filters']['from_date'],dts['filters']['to_date']))
+				elif 'from_date' in dts['filters'] :
+					fltrs.append(" creation >= '%s' " %dts['filters']['from_date'])
+				elif 'to_date' in dts['filters'] :
+					fltrs.append(" creation <= '%s' " %dts['filters']['to_date'])    
+				if 'by_name' in dts['filters']:
+					fltrs.append(" name like '%%%s%%' " %dts['filters']['by_name'])
+				# for key,value in dts['filters'].iteritems():
+				# 	if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
+				# 		fltrs.append(" a.%s = '%s' " %(key,value))
+				# 		print "fltrs :",fltrs,"\n" 	
+				fltr_cnd=" and "+' and '.join([x for x in fltrs])
+				print "fltr_cnd :",fltr_cnd,"\n"
+
+			match_conditions,cond=get_match_conditions('Attendance Record',dts['username'])   
+			if match_conditions : 
+				fltr_cnd+=cond
+				#return fltr_cnd
+			total_count= frappe.db.sql("select ifnull(count(name),0) from `tabAttendance Record` where attendance_type='Meeting Attendance' %s " %(fltr_cnd))
+			#return total_count
+			if (('page_no' not in dts) or cint(dts['page_no'])<=1):  
+				dts['page_no']=1
+				start_index=0
+				end_index =0
+			else:
+				start_index=(cint(dts['page_no'])-1)*20
+				end_index =start_index+20	
+
+			if total_count[0][0]<=end_index:
+				end_index=total_count[0][0] 
+			result={}
+			result['total_count']=total_count[0][0]
+			result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
+			result['records']=frappe.db.sql("""select name as meeting_name,CASE meeting_category  WHEN 'Cell Meeting' THEN meeting_subject ELSE meeting_sub END  as meeting_subject , from_date as meeting_date,to_date as end_date ,venue from `tabAttendance Record` where attendance_type='Meeting Attendance'  %s order by name limit %s,20"""%(fltr_cnd,cint(start_index)), as_dict=1)
+			
+			return result
+
 
 
 @frappe.whitelist(allow_guest=True)
@@ -1225,54 +1451,61 @@ def meetings_list_member_new(data):
 	"""
 	Meeting list of member user
 	"""
-        dts=json.loads(data)
-        print "data :",dts,"\n"
-        qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
-        valid=frappe.db.sql(qry)
-        if not valid:
-                return {
-                  "status":"401",
-                  "message":"User name or Password is incorrect"
-                }
-        else:
-      		fltr_cnd=''
+	dts=json.loads(data)
+	print "data :",dts,"\n"
+	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
+	valid=frappe.db.sql(qry)
+	if not valid:
+		return {
+			"status":"401",
+			"message":"User name or Password is incorrect"
+		}
+	else:
+		cond,match_cond,fltr_cnd='','',''
 		fltrs=[]
-	        if 'filters' in dts:
-	           	if 'from_date' in dts['filters']:
-    		    		dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
-  			if 'to_date' in dts['filters']:
-    		    		dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]
-		  	if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
-  	     			fltrs.append(" date(a.creation) >= '%s' and date(a.creation) <= '%s'" %(dts['filters']['from_date'],dts['filters']['to_date']))
-		    	elif 'from_date' in dts['filters'] :
-    	        		fltrs.append(" a.creation >= '%s' " %dts['filters']['from_date'])
-    	        
-		    	elif 'to_date' in dts['filters'] :
-    	        		fltrs.append(" a.creation <= '%s' " %dts['filters']['to_date'])    
-		    	for key,value in dts['filters'].iteritems():
-    	 			if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
-		    	       		fltrs.append(" a.%s = '%s' " %(key,value))
-		    	       		print "fltrs :",fltrs,"\n"
-		    	       		print "fltrs1 :",fltrs[0],"\n"
-			fltr_cnd=" and "+' and '.join([x for x in fltrs]) 
+		if 'filters' in dts:
+			if 'from_date' in dts['filters']:
+				dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
+			if 'to_date' in dts['filters']:
+				dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]
+			if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
+				fltrs.append(" date(a.creation) >= '%s' and date(a.creation) <= '%s'" %(dts['filters']['from_date'],dts['filters']['to_date']))
+			elif 'from_date' in dts['filters'] :
+				fltrs.append(" a.creation >= '%s' " %dts['filters']['from_date'])
+			elif 'to_date' in dts['filters'] :
+				fltrs.append(" a.creation <= '%s' " %dts['filters']['to_date'])    
+			elif 'by_name' in dts['filters']:
+				fltrs.append(" b.name like '%%%s%%' " %dts['filters']['by_name'])
+			# for key,value in dts['filters'].iteritems():
+			# 	if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
+			# 		fltrs.append(" a.%s = '%s' " %(key,value))
+			# 		print "fltrs :",fltrs,"\n" 	
+			fltr_cnd=" and "+' and '.join([x for x in fltrs])
+			# fltr_cnd=' and '.join([x for x in fltrs])
 			print "fltr_cnd :",fltr_cnd,"\n"
-		#return fltr_cnd       
-    		total_count= frappe.db.sql("select count(a.name)  from `tabAttendance Record`  a,`tabInvitation Member Details` b where a.name=b.parent and b.email_id='%s'  %s "%(dts['username'],fltr_cnd))	
+
+			# cond+= " and "+ fltr_cnd
+			# print "fltr_cnd :",fltr_cnd,"\n"
+		#return fltr_cnd
+		total_count= frappe.db.sql("select count(a.name)  from `tabAttendance Record`  a,`tabInvitation Member Details` b where a.name=b.parent and b.email_id='%s'  %s "%(dts['username'],fltr_cnd))	
+		print "total_count:", total_count[0],"\n"
 		if (('page_no' not in dts) or cint(dts['page_no'])<=1): 
 			dts['page_no']=1
 			start_index=0
-		else:   
+			end_index = 0
+		else:
 			start_index=(cint(dts['page_no'])-1)*20
-		end_index =start_index+20	
-	        if total_count[0][0]<=end_index:
+			end_index =start_index+20	
+        if total_count[0][0]<=end_index:
 			end_index=total_count[0][0] 
-	        result={}
-                result['total_count']=total_count[0][0]
-                result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
+        
+        result={}
+        result['total_count']=total_count[0][0]
+        result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
 
-	        result['records']=frappe.db.sql("select a.name as meeting_name,a.meeting_category as meeting_category, case a.meeting_category when 'Cell Meeting' then a.meeting_subject else a.meeting_sub end as `meeting_subject`,a.from_date as from_date,a.to_date as to_date,a.venue as venue,b.name as name,ifnull(b.present,0) as present from `tabAttendance Record`  a,`tabInvitation Member Details` b where a.name=b.parent and b.email_id='%s' %s order by name limit %s,20"%(dts['username'],fltr_cnd,cint(start_index)),as_dict=True)
-                return result                
-
+        result['records']=frappe.db.sql("select a.name as meeting_name,a.meeting_category as meeting_category, case a.meeting_category when 'Cell Meeting' then a.meeting_subject else a.meeting_sub end as `meeting_subject`,a.from_date as from_date,a.to_date as to_date,a.venue as venue,b.name as name,ifnull(b.present,0) as present from `tabAttendance Record`  a,`tabInvitation Member Details` b where a.name=b.parent and b.email_id='%s' %s order by name limit %s,20"%(dts['username'],fltr_cnd,cint(start_index)),as_dict=True)
+    	print "result :",result,"\n"
+    	return result
 
 
 @frappe.whitelist(allow_guest=True)
@@ -1354,7 +1587,7 @@ def get_masters(data):
 	"""
 	# print "dataata ",data,"\n"
 	dts=json.loads(data)
-	# print "Dts...",dts,"\n"
+	print "Dts...",dts,"\n"
 	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
 	valid=frappe.db.sql(qry)
 	if not valid:
@@ -1373,7 +1606,7 @@ def get_masters(data):
 	# print "data...",data,"\n"
 	a = frappe.db.sql("""select name ,%s as record_name  from `tab%s`  %s """%(','.join([x[0] for x in colmns ]),dts['tbl'], cnd1), as_dict=1,debug=1)
 	b = frappe.db.sql("""select name ,%s as record_name  from `tab%s` where %s order by creation desc"""%(','.join([x[0] for x in colmns ]),dts['tbl'], ' or '.join(match_conditions)), as_dict=1,debug=1)
-	# print "a ...",a,"\n"
+	print "a ...",a,"\n"
 	# print "b ...",b,"\n"
 	return a
 	# return frappe.db.sql("""select name ,%s as record_name  from `tab%s`  %s """%(','.join([x[0] for x in colmns ]),dts['tbl'], cnd1), as_dict=1,debug=1)
@@ -1457,13 +1690,17 @@ def get_database_masters(data):
 	#return dts
 	match_conditions,data=get_match_conditions(dts['tbl'],dts['username'])
 	colmns={
-	        "Invitees and Contacts":"name,invitee_contact_name,sex,email_id",
+	    "Invitees and Contacts":"name,invitee_contact_name,sex,email_id",
 		"First Timer":"name,ftv_name,surname,sex,email_id,cell,church",
 		"Member":"name,member_name,surname,email_id",		
 		"Partnership Record":"name,partnership_arms,FORMAT(amount,2) as amount,giving_or_pledge",
 		"Cells":"name,cell_name,senior_cell,senior_cell_name",
+		"Senior Cells":"name,senior_cell_name,pcf,pcf_name",
 		"PCFs":"name,pcf_name,church,church_name",
-		"Senior Cells":"name,senior_cell_name,pcf,pcf_name"
+		"Churches":"name,church,church_name,group_church,group_church_name",
+		"Group Churches":"name,group_church,group_church_name,zone,zone_name",
+		"Zones":"name,zone,zone_name,region,region_name",
+		"Regions":"name,region,region_name"
 	}
     	cond,match_cond,fltr_cnd='','',''
     	fltrs=[]
@@ -1497,7 +1734,10 @@ def get_database_masters(data):
     	        	fltrs.append(" giving_or_pledge='Giving' ")
     	        elif 'Pledge' in dts['filters'].values() :
     	        	fltrs.append(" giving_or_pledge='Pledge' ")    
-    	        	   
+    		if 'by_name' in dts['filters']:
+    			fltrs.append(" name like '%%%s%%' " %dts['filters']['by_name']) 
+
+
  		fltr_cnd=' and '.join([x for x in fltrs])
  		print "fltr_cnd :",fltr_cnd,"\n"
     	if match_conditions   :
@@ -1510,6 +1750,7 @@ def get_database_masters(data):
 	       	cond+= " where "+ match_cond
 	#frappe.errprint(cond)
 	total_count= frappe.db.sql("""select ifnull(count(name),0) from `tab%s`  %s """%(dts['tbl'], cond))	
+	print "cond :",cond,"\n"
 	if (('page_no' not in dts) or cint(dts['page_no'])<=1): 
 		dts['page_no']=1
 		start_index=0
@@ -1833,6 +2074,7 @@ def event_list_new(data):
     Event List for user
     """
     dts=json.loads(data)
+    print "dataIn ;",dts,"\n"
     from frappe.model.db_query import DatabaseQuery
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
@@ -1849,6 +2091,8 @@ def event_list_new(data):
     	    	dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
   	if 'to_date' in dts['filters']:
     	    	dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]    
+  	if 'by_name' in dts['filters']:
+					fltrs.append(" name like '%%%s%%' " %dts['filters']['by_name'])
   	if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
   	     	fltrs.append(" date(creation) between '%s' and '%s'" %(dts['filters']['from_date'],dts['filters']['to_date']))
     	elif 'from_date' in dts['filters'] :
@@ -1858,11 +2102,11 @@ def event_list_new(data):
     	        	fltrs.append(" creation <= '%s' " %dts['filters']['to_date'])    
     	if 'event_type' in dts['filters']:
   	     	fltrs.append(" event_type= '%s'" %(dts['filters']['event_type']))
-    	for key,value in dts['filters'].iteritems():
-    	 	if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
-    	       		fltrs.append(" %s = '%s' " %(key,value))
+    	# for key,value in dts['filters'].iteritems():
+    	#  	if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
+    	#        		fltrs.append(" %s = '%s' " %(key,value))
 	fltr_cnd=' and '.join([x for x in fltrs])+ " and "
-
+	print "filter ",fltr_cnd,"\n"
     tot_qry="""select ifnull(count(name),0) from tabEvent where %s %s """%(fltr_cnd,get_permission_query_conditions(dts['username']))
     total_count= frappe.db.sql(tot_qry)	
     if (('page_no' not in dts) or cint(dts['page_no'])<=1): 
@@ -1880,6 +2124,7 @@ def event_list_new(data):
     #return result    
     qry=" select name as event_name,address,starts_on as event_date,subject from tabEvent where "+ fltr_cnd+" "+ get_permission_query_conditions(dts['username'])+" order by name limit "+cstr(start_index)+",20"
     result['records']=frappe.db.sql(qry,as_dict=True)
+    print "result",result,"\n"
     return result    
 
         
@@ -1933,6 +2178,7 @@ def my_event_list(data):
     Member Event list
     """
     dts=json.loads(data)
+    print "dataIn :",dts,"\n"
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
     if not valid:
@@ -1948,6 +2194,8 @@ def my_event_list(data):
     	    	dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
   	if 'to_date' in dts['filters']:
     	    	dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]    
+  	if 'by_name' in dts['filters']:
+					fltrs.append(" a.name like '%%%s%%' " %dts['filters']['by_name'])
   	if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
   	     	fltrs.append(" date(a.creation) between '%s' and '%s'" %(dts['filters']['from_date'],dts['filters']['to_date']))
     	elif 'from_date' in dts['filters'] :
@@ -1957,10 +2205,11 @@ def my_event_list(data):
     	        	fltrs.append(" a.creation <= '%s' " %dts['filters']['to_date'])    
     	if 'event_type' in dts['filters']:
   	     	fltrs.append(" a.event_type= '%s'" %(dts['filters']['event_type']))
-    	for key,value in dts['filters'].iteritems():
-    	 	if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
-    	       		fltrs.append(" a.%s = '%s' " %(key,value))
+    	# for key,value in dts['filters'].iteritems():
+    	#  	if key in ('region','zone','church_group','church','pcf','senior_cell','cell'):
+    	#        		fltrs.append(" a.%s = '%s' " %(key,value))s
 	fltr_cnd="and "+' and '.join([x for x in fltrs])
+	print "fltr :",fltr_cnd,"\n"
     #return fltr_cnd
     tot_qry="""select ifnull(count(a.subject),0) from `tabEvent` a, `tabAttendance Record` b,`tabInvitation Member Details` c where attendance_type='Event Attendance' and a.name=b.event and b.name=c.parent and c.member in (select a.name from tabMember a,tabUser b where a.email_id=b.name and b.name='%s') %s """%(dts['username'],fltr_cnd)
     total_count= frappe.db.sql(tot_qry)	
@@ -1980,6 +2229,8 @@ def my_event_list(data):
     qry=" select a.subject ,a.name as `event_code`,a.starts_on as event_date,a.ends_on as `to_date`, c.member_name,a.address,c.name,ifnull(c.present,0) as present,comments from `tabEvent` a, `tabAttendance Record` b,`tabInvitation Member Details` c where attendance_type='Event Attendance' and a.name=b.event and b.name=c.parent and c.member in (select a.name from tabMember a,tabUser b where a.email_id=b.name and b.name='"+dts['username']+"') "+ fltr_cnd+" order by b.name limit "+cstr(start_index)+",20"
 
     result['records']=frappe.db.sql(qry,as_dict=True)
+    
+    print "reslt :",result,"\n"
     return result    
 
 @frappe.whitelist(allow_guest=True)
@@ -2004,6 +2255,7 @@ def my_event_attendance(data):
 def get_hierarchy(data):
 
     dts=json.loads(data)
+    print "dataIn :",dts,"\n"
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
     # print "data ",data,"\n\n"
@@ -2023,14 +2275,14 @@ def get_hierarchy(data):
     }
     tablename=dts['tbl']
     res=frappe.db.sql("select %s from `tab%s` where name='%s'"  %(dictnory[tablename],dts['tbl'],dts['name']),as_dict=True)
-    # print "res ....",res,"\n"
+    print "result ....",res,"\n"
     return res
 
 
 @frappe.whitelist(allow_guest=True)
 def get_lists(data):
     dts=json.loads(data)
-    #print dts
+    print "dts :",dts,"\n"
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
     if not valid:
@@ -2065,6 +2317,7 @@ def get_lists(data):
     }
     fieldname=dts['tbl']
     res=frappe.db.sql("select name,%s from `tab%s` where %s='%s'"  %(columns[tablename],fields[fieldname],wheres[tablename],dts['name']),as_dict=True)
+    print "res :",res,"\n"
     return res
 
 
@@ -2102,6 +2355,7 @@ def task_list_team(data):
 @frappe.whitelist(allow_guest=True)
 def task_list_new(data):
     dts=json.loads(data)
+    print "dataIn :",dts,"\n"
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
     if not valid:
@@ -2115,6 +2369,8 @@ def task_list_new(data):
     if 'filters' in dts:
    		if 'from_date' in dts['filters']:
     		    	dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
+  		if 'by_name' in dts['filters']:
+					fltrs.append(" a.name like '%%%s%%' " %dts['filters']['by_name'])
   		if 'to_date' in dts['filters']:
     		    	dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]    
     	        if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
@@ -2127,6 +2383,7 @@ def task_list_new(data):
     	 		if key in ('status','priority'):
     	        		fltrs.append(" a.%s = '%s' " %(key,value))
     		fltr_cnd=" and "+' and '.join([x for x in fltrs])
+    		print "fltr:",fltr_cnd,"\n"
     total_count= frappe.db.sql("""select count(a.name) from `tabTask` a, `tabToDo` b where a.status in ('Open','Working' )  and a.name=b.reference_name %s and a.exp_start_date is not null and b.owner='%s' """ %(fltr_cnd,dts['username']))
     #return total_count
     if (('page_no' not in dts) or cint(dts['page_no'])<=1): 
@@ -2140,12 +2397,14 @@ def task_list_new(data):
     result['total_count']=total_count[0][0]
     result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
     result['records']=frappe.db.sql("""select a.name ,b.owner as _assign,b.assigned_by as assignee,a.subject ,a.exp_end_date,a.comment,a.status,a.priority,a.description,a.cell,a.senior_cell,a.pcf from `tabTask` a, `tabToDo` b where a.status in ('Open','Working' )  and a.name=b.reference_name %s and a.exp_start_date is not null and b.owner='%s'  order by a.name limit %s,20""" %(fltr_cnd,dts['username'],cint(start_index)),as_dict=True)
+    print "result ;",result,"\n"
     return result
 
 @frappe.whitelist(allow_guest=True)
 def task_list_team_new(data):
     #gangadhar
     dts=json.loads(data)
+    print "dataIn :",dts,"\n"
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
     if not valid:
@@ -2160,6 +2419,8 @@ def task_list_team_new(data):
     if 'filters' in dts:
    		if 'from_date' in dts['filters']:
     		    	dts['filters']['from_date']=dts['filters']['from_date'][6:]+""+dts['filters']['from_date'][3:5]+""+dts['filters']['from_date'][:2]
+  		if 'by_name' in dts['filters']:
+					fltrs.append(" t.name like '%%%s%%' " %dts['filters']['by_name'])
   		if 'to_date' in dts['filters']:
     		    	dts['filters']['to_date']=dts['filters']['to_date'][6:]+""+dts['filters']['to_date'][3:5]+""+dts['filters']['to_date'][:2]    
     	        if (('from_date' in dts['filters']) and ('to_date' in dts['filters'])):
@@ -2172,6 +2433,7 @@ def task_list_team_new(data):
     	 		if key in ('status','priority'):
     	        		fltrs.append(" t.%s = '%s' " %(key,value))
     		fltr_cnd=" and "+' and '.join([x for x in fltrs])
+    		print "fltr:",fltr_cnd,"\n"
     total_count= frappe.db.sql("""select count(t.name) FROM tabTask t, tabToDo d WHERE t.name IN ( SELECT DISTINCT reference_name FROM tabToDo WHERE assigned_by='%s' ) AND t.name=d.reference_name %s  and d.status <>'Closed' AND t.status<>'Closed'""" %(dts['username'],fltr_cnd))
     if (('page_no' not in dts) or cint(dts['page_no'])<=1): 
 	dts['page_no']=1
@@ -2185,6 +2447,7 @@ def task_list_team_new(data):
     result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
     #result['records']=frappe.db.sql("""select a.name ,b.owner as _assign,b.assigned_by as assignee,a.subject ,a.exp_end_date,a.status,a.comment,a.priority,a.description,a.cell,a.senior_cell,a.pcf from `tabTask` a, `tabToDo` b where a.status in ('Open','Working' )  and a.name=b.reference_name %s and a.exp_start_date is not null and (a.owner='%s' or b.assigned_by='%s') order by a.name limit %s,20""" %(fltr_cnd,dts['username'],dts['username'],cint(start_index)),as_dict=True)
     result['records']=frappe.db.sql("SELECT DISTINCT (t.name),t.description,t.subject ,t.exp_end_date,t.status,t.priority,d.assigned_by AS asignee,t.comment,t.cell,t.senior_cell,t.pcf,d.owner AS _assign FROM tabTask t, tabToDo d WHERE t.name IN ( SELECT DISTINCT reference_name FROM tabToDo WHERE assigned_by='%s' ) AND t.name=d.reference_name and d.status <>'Closed' and t.status<>'Closed' %s order by t.name limit %s,20" %(dts['username'],fltr_cnd,cint(start_index)),as_dict=1)
+    print "result ;",result,"\n"
     return result
 
 
@@ -2467,6 +2730,7 @@ def search_group_member_church(data):
         import frappe.sessions
         #frappe.response.update(frappe.sessions.get())
         dts=json.loads(data)
+        print "dataIn :",dts,"\n"
         qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
         valid=frappe.db.sql(qry)
         if not valid:
@@ -2495,6 +2759,7 @@ def search_group_member_church(data):
                 key='1'
                 value=1
         cond+="where "+key+"='"+cstr(value)+"'"
+        print "cond :",cond,"\n"
     	if 'filters' in dts:
     		if 'from_date' in dts['filters']:
     		    	dts['filters']['from_date']=dts['filters']['from_date'][6:]+"-"+dts['filters']['from_date'][3:5]+"-"+dts['filters']['from_date'][:2]
@@ -2505,7 +2770,10 @@ def search_group_member_church(data):
     		elif 'from_date' in dts['filters'] :
     	        	cond+=" and creation>= '%s' " %dts['filters']['from_date']
     		elif 'to_date' in dts['filters'] :
-    	        	cond+=" and creation <= '%s' " %dts['filters']['to_date'] 
+    	        	cond+=" and creation <= '%s' " %dts['filters']['to_date']
+    		if 'by_name' in dts['filters']:
+    			fltrs.append(" name like '%%%s%%' " %dts['filters']['by_name'])
+
         #return cond
         if 'search' in dts and dts['search']=='Group':
         		if 'member' in dts:
@@ -2524,9 +2792,11 @@ def search_group_member_church(data):
     			result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'
     			if 'member' in dts:
     				result['records']=frappe.db.sql("select name as id , 'Cells' as type,cell_name as name,contact_phone_no,contact_email_id from tabCells %s  and (name like '%%%s%%' or cell_name like '%%%s%%' ) union select name  as id,'Senior Cells' as type,senior_cell_name as name,contact_phone_no,contact_email_id from `tabSenior Cells` %s and (name like '%%%s%%' or senior_cell_name like '%%%s%%' ) union select name  as id,'PCFs' as type,pcf_name as name,contact_phone_no,contact_email_id from `tabPCFs` %s and (name like '%%%s%%' or pcf_name like '%%%s%%' ) order by type,name limit %s,20" %(cond ,dts['member'],dts['member'],cond,dts['member'],dts['member'],cond,dts['member'],dts['member'],cint(start_index)),as_dict=True)
+                        	print "reslut mem grp :",result,"\n"
                         	return result
     			
                         result['records']=frappe.db.sql("select name as id , 'Cells' as type,cell_name as name,contact_phone_no,contact_email_id from tabCells %s union select name  as id,'Senior Cells' as type,senior_cell_name as name,contact_phone_no,contact_email_id from `tabSenior Cells` %s union select name  as id,'PCFs' as type,pcf_name as name,contact_phone_no,contact_email_id from `tabPCFs` %s order by type,name limit %s,20" %(cond,cond,cond,cint(start_index)),as_dict=True)
+                        print "reslut grp :",result,"\n"
                         return result
         elif 'search' in dts and dts['search']=='Church':
         		if 'member' in dts:
@@ -2548,14 +2818,17 @@ def search_group_member_church(data):
     			if 'member' in dts:
     				#result['records']=frappe.db.sql("select name as id , 'Churches' as type,church_name as name,phone_no as contact_phone_no,email_id as contact_email_id from tabChurches %s and (name like '%%%s%%' or church_name like '%%%s%%' ) union select name as id , 'Group Churches' as type,church_group as name,contact_phone_no,contact_email_id from `tabGroup Churches` %s and (name like '%%%s%%' or church_group like '%%%s%%' ) union select name as id , 'Zones' as type,zone_name as name,contact_phone_no,contact_email_id from `tabZones`  %s and (name like '%%%s%%' or zone_name like '%%%s%%' ) union select name as id , 'Regions' as type,region_name as name,contact_phone_no,contact_email_id from `tabRegions` %s and (name like '%%%s%%' or region_name like '%%%s%%' ) order by type,id limit %s,20"%(cond,dts['member'],dts['member'],cond,dts['member'],dts['member'],cond,dts['member'],dts['member'],cond,dts['member'],dts['member'],cint(start_index)),as_dict=True)
     				result['records']=frappe.db.sql("select name as id , 'Churches' as type,church_name as name,phone_no as contact_phone_no,email_id as contact_email_id from tabChurches (name like '%%%s%%' or church_name like '%%%s%%' ) union select name as id , 'Group Churches' as type,church_group as name,contact_phone_no,contact_email_id from `tabGroup Churches` (name like '%%%s%%' or church_group like '%%%s%%' ) union select name as id , 'Zones' as type,zone_name as name,contact_phone_no,contact_email_id from `tabZones`  (name like '%%%s%%' or zone_name like '%%%s%%' ) union select name as id , 'Regions' as type,region_name as name,contact_phone_no,contact_email_id from `tabRegions` (name like '%%%s%%' or region_name like '%%%s%%' ) order by type,id limit %s,20"%(dts['member'],dts['member'],dts['member'],dts['member'],dts['member'],dts['member'],dts['member'],dts['member'],cint(start_index)),as_dict=True)
+                		print "reslut mem chr :",result,"\n"
                 		return result
                 	#result['records']=frappe.db.sql("select name as id , 'Churches' as type,church_name as name,phone_no as contact_phone_no,email_id as contact_email_id from tabChurches %s union select name as id , 'Group Churches' as type,church_group as name,contact_phone_no,contact_email_id from `tabGroup Churches` %s union select name as id , 'Zones' as type,zone_name as name,contact_phone_no,contact_email_id from `tabZones`  %s union select name as id , 'Regions' as type,region_name as name,contact_phone_no,contact_email_id from `tabRegions` %s order by type,id limit %s,20"%(cond,cond,cond,cond,cint(start_index)),as_dict=True,debug=1)
                 	result['records']=frappe.db.sql("select name as id , 'Churches' as type,church_name as name,phone_no as contact_phone_no,email_id as contact_email_id from tabChurches  union select name as id , 'Group Churches' as type,church_group as name,contact_phone_no,contact_email_id from `tabGroup Churches` union select name as id , 'Zones' as type,zone_name as name,contact_phone_no,contact_email_id from `tabZones`  union select name as id , 'Regions' as type,region_name as name,contact_phone_no,contact_email_id from `tabRegions`  order by type,id limit %s,20"%(cint(start_index)),as_dict=True)
+                	print "reslut chrc :",result,"\n"
                 	return result
         else:
         	if 'member' in dts:
         	    cond+=" and member_name like '%%%s%%'"%(dts['member'])
         	#frappe.errprint(cond)
+
         	total_count= frappe.db.sql("select count(name) from tabMember %s "%(cond))
     		if (('page_no' not in dts) or cint(dts['page_no'])<=1): 
 				dts['page_no']=1
@@ -2568,6 +2841,7 @@ def search_group_member_church(data):
     		result['total_count']=total_count[0][0]
     		result['paging_message']=cstr(cint(start_index)+1) + '-' + cstr(end_index) + ' of ' + cstr(total_count[0][0]) + ' items'           	  
         	result['records']=frappe.db.sql("select a.name as id, 'Members' as type, a.member_name as name, a.phone_1 as contact_phone_no,a.email_id as contact_email_id from tabMember a %s order by a.name limit %s,20 "%(cond,cint(start_index)),as_dict=True)
+        	print "reslut mem :",result,"\n"
         	return result
 
 
