@@ -21,6 +21,10 @@ class FirstTimer(Document):
 		# 		frappe.throw(_("When and Where is Mandatory if 'Baptisum Status' is 'Yes'..!"))
 
 		if self.email_id:
+			# a =  frappe.db.sql("""select email_id  from `tabMember` where email_id = "{0}" """.format(self.email_id),as_dict=1)[0]
+			# print "validating...",a
+			# if a:
+			# 	frappe.throw(_('{0} already Exists, Please Choose new email Id').format(self.email_id))
 			if not validate_email_add(self.email_id):
 				frappe.throw(_('{0} is not a valid email id').format(self.email_id))
 

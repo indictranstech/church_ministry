@@ -12,6 +12,8 @@ from frappe.utils import getdate, validate_email_add, cint,cstr,now,flt, nowdate
 import base64
 from datetime import datetime
 from gcm import GCM
+import sys, os
+
 
 class Member(Document):
 
@@ -245,40 +247,46 @@ def user_roles(data):
 		#qry=''
 		role,defkey='',''
 		user_roles = frappe.get_roles(dts['username'])
-                if "Regional Pastor" in user_roles:
+		if "System Manager" in user_roles:
+			role = 'System Manager'
+			defkey='*'
+		elif 'Administrator' in user_roles:
+			role = 'Administrator'
+			defkey='*'
+		elif "Regional Pastor" in user_roles:
 			role='Regional Pastor'
 			defkey='Regions'
-                elif "Zonal Pastor" in user_roles:
+		elif "Zonal Pastor" in user_roles:
 			role='Zonal Pastor'
 			defkey='Zones'
-                elif "Group Church Pastor" in user_roles :
+		elif "Group Church Pastor" in user_roles :
 			role='Group Church Pastor'
 			defkey='Group Churches'
-                elif "Church Pastor"  in user_roles:
+		elif "Church Pastor"  in user_roles:
 			role='Church Pastor'
 			defkey='Churches'
-                elif "PCF Leader"  in user_roles:
+		elif "PCF Leader"  in user_roles:
 			role='PCF Leader'
 			defkey='PCFs'
-                elif "Senior Cell Leader"  in user_roles:
+		elif "Senior Cell Leader"  in user_roles:
 			role='Senior Cell Leader'
 			defkey='Senior Cells'
-                elif "Cell Leader"  in user_roles:
+		elif "Cell Leader"  in user_roles:
 			role='Cell Leader'
 			defkey='Cells'
-                elif "Bible Study Class Teacher"  in user_roles:
+		elif "Bible Study Class Teacher"  in user_roles:
 			role='Bible Study Class Teacher'
 		elif "Partnership Rep"  in user_roles:
 			role='Partnership Rep'
 			defkey='Churches'
-                elif "Member"  in user_roles:
+		elif "Member"  in user_roles:
 			role='Member'
 			defkey='Member'
-                roles=frappe.db.sql("select role from `tabUserRole` where role= %(role)s and parent=%(user)s", {"role":role, "user":dts['username']},as_dict=1)                 
-                user_values=frappe.db.sql("select defkey,defvalue from `tabDefaultValue`  where defkey=%(defkey)s and parent=%(user)s", {"defkey":defkey, "user":dts['username']},as_dict=1)
-                data['roles']=roles
-                data['user_values']=user_values
-                print "data : ",data,"\n"
+		roles=frappe.db.sql("select role from `tabUserRole` where role= %(role)s and parent=%(user)s", {"role":role, "user":dts['username']},as_dict=1)                 
+		user_values=frappe.db.sql("select defkey,defvalue from `tabDefaultValue`  where defkey=%(defkey)s and parent=%(user)s", {"defkey":defkey, "user":dts['username']},as_dict=1)
+		data['roles']=roles
+		data['user_values']=user_values
+		print "data : ",data,"\n"
 		return data
 
 
@@ -330,24 +338,28 @@ def create_regions(data):
                   "message":"You have no permission to create Regions"
                 }
 	else:
-		obj=frappe.new_doc("Regions")
-		obj.region=dts['region']
-		obj.region_name=dts['region']
-		obj.contact_phone_no=dts['contact_phone_no']
-		obj.contact_email_id=dts['contact_email_id']
-		obj.meeting_location=dts['meeting_location']
 		try:
+			obj=frappe.new_doc("Regions")
+			obj.region_code=dts['region']
+			obj.region_name=dts['region']
+			if 'meeting_location' in dts:
+				obj.meeting_location=dts['meeting_location']
+			if 'contact_phone_no' in dts:
+				obj.contact_phone_no=dts['contact_phone_no']
+			if 'contact_email_id' in dts:
+				obj.contact_email_id=dts['contact_email_id']
+
+
+		
 			obj.insert(ignore_permissions=True)
+			print "Successfully created Region!\n"
 			return "Successfully created Regions '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
 		  		"status":"403",
-		  		"message":rsp
+		  		"message":"Something Went wrong!"
 			}
 
 
@@ -373,28 +385,38 @@ def create_zones(data):
                   "message":"You have no permission to create zones"
                 }
 	else:
-		obj=frappe.new_doc("Zones")
-		obj.zone=dts['zone_name']
-		obj.zone_name=dts['zone_name']
-		higher_details=frappe.db.sql("select region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
-	
-		obj.region=higher_details[0][1]
-		obj.region_name=higher_details[0][2]
-		obj.contact_phone_no=dts['contact_phone_no']
-		obj.contact_email_id=dts['contact_email_id']
-		obj.meeting_location=dts['meeting_location']
+			
 		try:
+			obj=frappe.new_doc("Zones")
+			obj.zone_code=dts['zone']
+			obj.zone_name=dts['zone']
+			if 'meeting_location' in dts:
+				obj.meeting_location=dts['meeting_location']
+			if 'contact_phone_no' in dts:
+				obj.contact_phone_no=dts['contact_phone_no']
+			if 'contact_email_id' in dts:
+				obj.contact_email_id=dts['contact_email_id']
+
+
+			if 'region' in dts:
+				obj.region=dts['region']
+				obj.region_name=dts['region']
+
+			# higher_details=frappe.db.sql("select region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
+		
+			# obj.region=higher_details[0][1]
+			# obj.region_name=higher_details[0][2]
+			
+		
 			obj.insert(ignore_permissions=True)
+			print "Successfully created Zone !\n"
 			return "Successfully created Zones '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
-		  		"status":"403",
-		  		"message":rsp
+				"status":"403",
+				"message":"Something Went wrong!"
 			}
 
 
@@ -419,33 +441,44 @@ def create_group_church(data):
         if not frappe.has_permission(doctype="Group Churches", ptype="create",user=dts['username']):
                 return {
                   "status":"403",
-                  "message":"You have no permission to Group Churches"
+                  "message":"You have no permission to create Group Churches"
                 }
 	else:
-		obj=frappe.new_doc("Group Churches")
-		obj.church_group=dts['church_group']
-		obj.group_church_name=dts['church_group']
-		
-		higher_details=frappe.db.sql("select zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
-		obj.zone=higher_details[0][1]
-		obj.zone_name=higher_details[0][2]
-		obj.region=higher_details[0][3]
-		obj.region_name=higher_details[0][4]
-		obj.contact_phone_no=dts['contact_phone_no']
-		obj.contact_email_id=dts['contact_email_id']
-		obj.meeting_location=dts['meeting_location']
 		try:
+			obj=frappe.new_doc("Group Churches")
+			obj.church_group=dts['church_group']
+			obj.church_group_code=dts['church_group']
+			
+			if 'meeting_location' in dts:
+				obj.meeting_location=dts['meeting_location']
+			if 'contact_phone_no' in dts:
+				obj.contact_phone_no=dts['contact_phone_no']
+			if 'contact_email_id' in dts:
+				obj.contact_email_id=dts['contact_email_id']
+
+			# higher_details=frappe.db.sql("select zone,zone_name,region,region_name from `tabZones` where name='%s'"%(dts['zone']))
+			# obj.zone=higher_details[0][0]
+			# obj.zone_name=higher_details[0][1]
+			# obj.region=higher_details[0][2]
+			# obj.region_name=higher_details[0][3]
+			
+		
+			if 'zone' in dts:
+				obj.zone=dts['zone']
+				obj.zone_name=dts['zone']
+			if 'region' in dts:
+				obj.region=dts['region']
+				obj.region_name=dts['region']
+
 			obj.insert(ignore_permissions=True)
+			print "Successfully created Group Churches!\n"
 			return "Successfully created Group Churches '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
-		  		"status":"403",
-		  		"message":rsp
+				"status":"403",
+				"message":"Something Went wrong!"
 			}
 
 
@@ -470,31 +503,48 @@ def create_church(data):
                   "message":"You have no permission to create churches"
                 }
 	else:
-		obj=frappe.new_doc("Churches")
-		obj.church_name=dts['church_name']
-		obj.church=dts['church_name']
-		higher_details=frappe.db.sql("select church_group,group_church_name,zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
-		obj.church_group=higher_details[0][1]
-		obj.group_church_name=higher_details[0][2]
-		obj.zone=higher_details[0][3]
-		obj.zone_name=higher_details[0][4]
-		obj.region=higher_details[0][5]
-		obj.region_name=higher_details[0][6]
-		obj.contact_phone_no=dts['contact_phone_no']
-		obj.contact_email_id=dts['contact_email_id']
-		obj.meeting_location=dts['meeting_location']
+		
 		try:
+			obj=frappe.new_doc("Churches")
+			obj.church_name=dts['church']
+			obj.church_code=dts['church']
+
+			if 'meeting_location' in dts:
+				obj.meeting_location=dts['meeting_location']
+			if 'contact_phone_no' in dts:
+				obj.contact_phone_no=dts['contact_phone_no']
+			if 'contact_email_id' in dts:
+				obj.contact_email_id=dts['contact_email_id']
+			if 'church_group' in dts:
+				obj.church_group=dts['church_group']
+				obj.group_church_name=dts['church_group']
+			if 'zone' in dts:
+				obj.zone=dts['zone']
+				obj.zone_name=dts['zone']
+			if 'region' in dts:
+				obj.region=dts['region']
+				obj.region_name=dts['region']
+
+			# higher_details=frappe.db.sql("select church_group_code,church_group,zone,zone_name,region,region_name from `tabGroup Churches` where name='%s'"%(dts['church_group']))
+			# print "details :",higher_details,"\n"
+			# obj.church_group=higher_details[0][0]
+			# obj.group_church_name=higher_details[0][1]
+			# obj.zone=higher_details[0][2]
+			# obj.zone_name=higher_details[0][3]
+			# obj.region=higher_details[0][4]
+			# obj.region_name=higher_details[0][5]
+
+		
+		
 			obj.insert(ignore_permissions=True)
-			return "Successfully created church '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+			print "Successfully created Church!\n"
+			return "Successfully created Church '"+obj.name+"'"
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
-		  		"status":"403",
-		  		"message":rsp
+				"status":"403",
+				"message":"Something Went wrong!"
 			}
 
 
@@ -520,35 +570,50 @@ def create_pcf(data):
                   "message":"You have no permission to create PCFs"
                 }
 	else:
-		obj=frappe.new_doc("PCFs")
-		obj.pcf_name=dts['pcf_name']
-		obj.pcf=dts['pcf_name']
-		obj.church=dts['church']
-		#return "select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church'])
-		higher_details=frappe.db.sql("select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church']))
-		obj.church_name=higher_details[0][0]
-		obj.church_group=higher_details[0][1]
-		obj.group_church_name=higher_details[0][2]
-		obj.zone=higher_details[0][3]
-		obj.zone_name=higher_details[0][4]
-		obj.region=higher_details[0][5]
-		obj.region_name=higher_details[0][6]
-		if 'contact_phone_no' in dts:
-			obj.contact_phone_no=dts['contact_phone_no']
-		if 'contact_email_id' in dts:
-			obj.contact_email_id=dts['contact_email_id']
 		try:
+			obj=frappe.new_doc("PCFs")
+			obj.pcf_name=dts['pcf_name']
+			obj.pcf_code=dts['pcf_name']
+			obj.church=dts['church']
+			if 'meeting_location' in dts:
+				obj.meeting_location=dts['meeting_location']
+			if 'contact_phone_no' in dts:
+				obj.contact_phone_no=dts['contact_phone_no']
+			if 'contact_email_id' in dts:
+				obj.contact_email_id=dts['contact_email_id']
+			
+
+			if 'church_name' in dts:
+				obj.church = dts['church_name']
+				obj.church_name = dts['church_name']
+			if 'church_group' in dts:
+				obj.church_group=dts['church_group']
+				obj.group_church_name=dts['church_group']
+			if 'zone' in dts:
+				obj.zone=dts['zone']
+				obj.zone_name=dts['zone']
+			if 'region' in dts:
+				obj.region=dts['region']
+				obj.region_name=dts['region']
+
+			# higher_details=frappe.db.sql("select church_name,church_group,church_group_name,zone,zone_name,region,region_name from `tabChurches` where name='%s'"%(dts['church']))
+			# obj.church_name=higher_details[0][0]
+			# obj.church_group=higher_details[0][1]
+			# obj.group_church_name=higher_details[0][2]
+			# obj.zone=higher_details[0][3]
+			# obj.zone_name=higher_details[0][4]
+			# obj.region=higher_details[0][5]
+			# obj.region_name=higher_details[0][6]
+			
+		
 			obj.insert(ignore_permissions=True)
 			return "Successfully Created PCF '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
-		  		"status":"403",
-		  		"message":rsp
+				"status":"403",
+				"message":"Something Went wrong!"
 			}
 
 	
@@ -574,38 +639,68 @@ def create_senior_cells(data):
                   "message":"You have no permission to create Senior Cell"
                 }
 	else:
-		obj=frappe.new_doc("Senior Cells")
-		obj.senior_cell_name=dts['senior_cell_name']
-		obj.senior_cell=dts['senior_cell_name'] 
-		
-		obj.pcf=dts['pcf']
-		higher_details=frappe.db.sql("select pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
-		obj.pcf_name=higher_details[0][0]
-		obj.church=higher_details[0][1]
-		obj.church_name=higher_details[0][2]
-		obj.church_group=higher_details[0][3]
-		obj.group_church_name=higher_details[0][4]
-		obj.zone=higher_details[0][5]
-		obj.zone_name=higher_details[0][6]
-		obj.region=higher_details[0][7]
-		obj.region_name=higher_details[0][8]
-		obj.contact_phone_no=dts['contact_phone_no']
-		obj.contact_email_id=dts['contact_email_id']
-		obj.meeting_location=dts['meeting_location']
 		try:
+			obj = frappe.new_doc("Senior Cells")
+			if'senior_cell_name' in dts:	
+				obj.senior_cell_name = dts['senior_cell_name']
+				obj.senior_cell_code = dts['senior_cell_name'] 
+
+			if 'meeting_location' in dts:
+				obj.meeting_location = dts['meeting_location']
+			if 'contact_phone_no' in dts:
+				obj.contact_phone_no = dts['contact_phone_no']
+			if 'contact_email_id' in dts:
+				obj.contact_email_id = dts['contact_email_id']
+
+
+			if 'pcf' in dts:
+				obj.pcf = dts['pcf']
+				obj.pcf_name = dts['pcf']
+			if 'church' in dts:
+				obj.church = dts['church']
+				obj.church_name = dts['church']
+			if 'church_group' in dts:
+				obj.church_group = dts['church_group']
+				obj.group_church_name = dts['church_group']
+			if 'zone' in dts:
+				obj.zone = dts['zone']
+				obj.zone_name = dts['zone']
+			if 'region' in dts:
+				obj.region = dts['region']
+				obj.region_name = dts['region']
+
+			# obj.pcf=dts['pcf']
+			# higher_details=frappe.db.sql("select pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name from `tabPCFs` where name='%s'"%(dts['pcf']))
+			# obj.pcf_name=higher_details[0][0]
+			# obj.church=higher_details[0][1]
+			# obj.church_name=higher_details[0][2]
+			# obj.church_group=higher_details[0][3]
+			# obj.group_church_name=higher_details[0][4]
+			# obj.zone=higher_details[0][5]
+			# obj.zone_name=higher_details[0][6]
+			# obj.region=higher_details[0][7]
+			# obj.region_name=higher_details[0][8]
+		
+		
 			obj.insert(ignore_permissions=True)
 			return "Successfully created senior Cell '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
-		  		"status":"403",
-		  		"message":rsp
-			}
-
+				"status":"403",
+				"message":"Something Went wrong!"
+			}	
+		# except Exception as e :
+		# 	exc_type, exc_obj, exc_tb = sys.exc_info()
+		# 	fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+		# 	print(exc_type, fname, exc_tb.tb_lineno)
+		# 	print "An exception was thrown!"
+		# 	print e
+		# 	return {
+		# 		"status":"403",
+		# 		"message":"Something Went wrong!"
+		# 	}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -653,15 +748,12 @@ def create_cells(data):
 		try:
 			obj.insert(ignore_permissions=True)
 			return "Successfully created Cell '"+obj.name+"'"
-		except  :
-			msg=""
-			if frappe.local.message_log:
-				for d in frappe.local.message_log:
-					msg+= d +" "
-			rsp = json.dumps(msg)
+		except Exception, error:
+			print "An exception was thrown!"
+			print str(error)
 			return {
-		  		"status":"403",
-		  		"message":rsp
+				"status":"403",
+				"message":"Something Went wrong!"
 			}
 		                
 
@@ -671,9 +763,10 @@ def create_ftv(data):
 	Need to check validation/ duplication  etc
 	
 	"""
-	# print "create_ftv_IN...",data,"\n"
+	
 	try:
 		dts=json.loads(data)
+		print "create_ftv_IN...",dts,"\n"
 		qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
 		valid=frappe.db.sql(qry)
 		# print "ftc_qry...",qry,"\n\n"
@@ -698,12 +791,12 @@ def create_ftv(data):
 			# cell = dts['cell']
 			# print "cell..",cell,"\n\n"
 			user_id = dts['username']
-			# print "email_id..",user_id,"\n\n"
+			print "email_id..",user_id,"\n\n"
 
-			other_data = frappe.db.sql("""select region_name,zone_name,group_church_name,church_name,pcf_name,senior_cell_name,
-				cell_name from `tabMember` where user_id = "{0}" """.format(user_id),as_dict=1)[0]
+			other_data = frappe.db.sql("""select cell,senior_cell,pcf,church,church_group,zone,region,region_name,zone_name,group_church_name,church_name,pcf_name,senior_cell_name,
+				cell_name from `tabMember` where email_id = "{0}" """.format(user_id),as_dict=1)[0]
 
-			# print "other_data = ",other_data,"\n\n"
+			print "other_data = ",other_data,"\n\n"
 
 			if 'office_address' in dts:
 				obj.office_address=dts['office_address']
@@ -725,7 +818,7 @@ def create_ftv(data):
 				obj.email_id_2=dts['email_id2']
 			if 'ftv_type' in dts:
 				obj.ftv_type=dts['ftv_type']
-			# print "1"	
+			print "1"	
 			if 'phone_2' in dts:
 				obj.phone_2=dts['phone_2']
 			if 'marital_info' in dts:
@@ -744,7 +837,7 @@ def create_ftv(data):
 				obj.office_landmark=dts['office_landmark']
 			if 'baptism_where' in dts:
 				obj.baptism_where=dts['baptism_where']
-			# print "2"
+			print "2"
 			if 'title' in dts:
 				obj.title=dts['title']
 			if 'baptism_when' in dts:
@@ -767,7 +860,7 @@ def create_ftv(data):
 				obj.address_manual=dts['address_manual']
 			if 'date_of_visit' in dts:
 				obj.date_of_visit=dts['date_of_visit']
-			# print "3"
+			print "3"
 			if 'yokoo_id' in dts:
 				obj.yokoo_id=dts['yokoo_id']
 			if 'yearly_income' in dts:
@@ -776,56 +869,70 @@ def create_ftv(data):
 				obj.task_description=dts['task_description']
 			if 'due_date' in dts:
 				obj.due_date=dts['due_date']
-			if 'cell' in dts:
-				obj.cell=dts['cell']
-			if 'senior_cell' in dts:
-				obj.senior_cell=dts['senior_cell']	
-			if 'pcf' in dts:
-				obj.pcf=dts['pcf']	
-			if 'church' in dts:
-				obj.church=dts['church']
-			if 'church_group' in dts:
-				obj.church_group=dts['church_group']
-			if 'zone' in dts:
-				obj.zone=dts['zone']
-			if 'region' in dts:
-				obj.region=dts['region']
+
 			if 'email_id' in dts:
 				obj.email_id=dts['email_id']
 			if 'surname' in dts:
 				obj.surname=dts['surname']
 			if 'short_bio' in dts:
 				obj.short_bio=dts['short_bio']
-			# if 'cell_name' in dts:
-			# 	obj.cell_name=dts['cell_name']
 			
-			if 'zone_name' in other_data:
-				obj.zone_name=other_data.get('zone_name')
-			# print "4"
-			if 'region_name' in other_data:
-				obj.region_name=other_data.get('region_name') 
-			if 'church_name' in other_data:
-				obj.church_name=other_data.get('church_name')
-			if 'group_church_name' in other_data:
-				obj.group_church_name=other_data.get('group_church_name')
-			if 'pcf_name' in other_data:
-				obj.pcf_name=other_data.get('pcf_name')
-			if 'senior_cell_name' in other_data:
-				obj.senior_cell_name=other_data.get('senior_cell_name')
+
+			print "4"
+			if 'cell' in other_data:
+				obj.cell=other_data.get('cell')
 			if 'cell_name' in other_data:
 				obj.cell_name=other_data.get('cell_name')
 
-		 	# print "5"
-			obj.insert(ignore_permissions=True)
-			# print "obj...",obj.name,"\n\n"
+			if 'senior_cell' in other_data:
+				obj.senior_cell=other_data.get('senior_cell')
+			if 'senior_cell_name' in other_data:
+				obj.senior_cell_name=other_data.get('senior_cell_name')
+
+			if 'pcf' in other_data:
+				obj.pcf=other_data.get('pcf')
+			if 'pcf_name' in other_data:
+				obj.pcf_name=other_data.get('pcf_name')
+
+			if 'church' in other_data:
+				obj.church=other_data.get('church')
+			if 'church_name' in other_data:
+				obj.church_name=other_data.get('church_name')
+
+			if 'church_group' in other_data:
+				obj.church_group=other_data.get('church_group')
+			if 'group_church_name' in other_data:
+				obj.group_church_name=other_data.get('group_church_name')	
+
+			if 'zone' in other_data:
+				obj.zone=other_data.get('zone')
+			if 'zone_name' in other_data:
+				obj.zone_name=other_data.get('zone_name')
+
+			if 'region' in other_data:
+				obj.region=other_data.get('region')
+			if 'region_name' in other_data:
+				obj.region_name=other_data.get('region_name')
+
+			# a =  frappe.db.sql("""select email_id  from `tabMember` where email_id = "{0}" """.format(self.email_id),as_dict=1)[0]
+			# print "validating...",a
+			# if a:
+			# 	return "Sorry..! " +self.email_id + ' Already Exists, Please Choose a different Email-Id'
+			# if not a:
+				
+		 	print "5"
+		 	obj.insert(ignore_permissions=True)
+			print "obj...",obj.name,"\n\n"
 			return "Successfully Created First Timer '"+obj.name+"'"
+
+			
 	except  :
 			msg=""
 			if frappe.local.message_log:
 				for d in frappe.local.message_log:
 					msg+= d +" "
 			rsp = json.dumps(msg)
-			# print "not done...",msg,"\n\n"
+			print "not done...Duplicate Email Exists",msg,"\n\n"
 			return {
 		  		"status":"403",
 		  		"message":"Something Went wrong!"
@@ -843,7 +950,7 @@ def create_member(data):
 	"""
 	# print "member data : ",data,"\n\n"
 	dts=json.loads(data)
-	# print "member dts : ",dts,"\n\n"
+	print "member dts : ",dts,"\n\n"
 	qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
 	valid=frappe.db.sql(qry)
 	if not valid:
@@ -917,6 +1024,8 @@ def create_member(data):
 			obj.date_of_join=dts['date_of_join']
 		if 'yokoo_id' in dts:
 			obj.yokoo_id=dts['yokoo_id']
+		
+
 		if 'cell' in dts:
 			obj.cell=dts['cell']
 		if 'senior_cell' in dts:
@@ -956,6 +1065,7 @@ def create_member(data):
 			obj.short_bio=dts['short_bio']
 		try:
 			obj.insert(ignore_permissions=True)
+			print "obj...",obj.name,"\n\n"
 			return "Successfully Created Member '"+obj.name+"'"
 		except  :
 			msg=""
@@ -1602,12 +1712,13 @@ def get_masters(data):
     	if match_conditions   :
 		cond =  ' or '.join(match_conditions) 
 		cnd1=" where "+ cond
-	# print "Match_conditions...",match_conditions,"\n"
+	print "Match_conditions...",match_conditions,"\n"
 	# print "data...",data,"\n"
 	a = frappe.db.sql("""select name ,%s as record_name  from `tab%s`  %s """%(','.join([x[0] for x in colmns ]),dts['tbl'], cnd1), as_dict=1,debug=1)
 	b = frappe.db.sql("""select name ,%s as record_name  from `tab%s` where %s order by creation desc"""%(','.join([x[0] for x in colmns ]),dts['tbl'], ' or '.join(match_conditions)), as_dict=1,debug=1)
+	
 	print "a ...",a,"\n"
-	# print "b ...",b,"\n"
+	print "b ...",b,"\n"
 	return a
 	# return frappe.db.sql("""select name ,%s as record_name  from `tab%s`  %s """%(','.join([x[0] for x in colmns ]),dts['tbl'], cnd1), as_dict=1,debug=1)
 	# return frappe.db.sql("""select name ,%s as record_name  from `tab%s` where %s order by creation desc"""%(','.join([x[0] for x in colmns ]),dts['tbl'], ' or '.join(match_conditions)), as_dict=1,debug=1)
@@ -2258,7 +2369,7 @@ def get_hierarchy(data):
     print "dataIn :",dts,"\n"
     qry="select user from __Auth where user='"+cstr(dts['username'])+"' and password=password('"+cstr(dts['userpass'])+"') "
     valid=frappe.db.sql(qry)
-    # print "data ",data,"\n\n"
+    print "data ",dts,"\n\n"
     #print dts
     if not valid:
         return {
@@ -2267,13 +2378,14 @@ def get_hierarchy(data):
         }
     dictnory={
         "Cells":"senior_cell,senior_cell_name,pcf,pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
-        "Senior Cells":"pcf,pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
-        "PCFs":"church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
-        "Churches":"church_group,church_group_name,zone,zone_name,region,region_name",
-        "Group Churches":"zone,zone_name,region,region_name",
-        "Zones":"region,region_name"
+        "Senior Cells":"senior_cell_name,senior_cell_code,pcf,pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
+        "PCFs":"pcf_code,pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
+        "Churches":"church_code,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
+        "Group Churches":"church_group_code,church_group,zone,zone_name,region,region_name",
+        "Zones":"zone_code,zone_name,region,region_name"
     }
     tablename=dts['tbl']
+    print "table name : ",tablename
     res=frappe.db.sql("select %s from `tab%s` where name='%s'"  %(dictnory[tablename],dts['tbl'],dts['name']),as_dict=True)
     print "result ....",res,"\n"
     return res
