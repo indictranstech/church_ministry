@@ -359,7 +359,7 @@ def create_regions(data):
 			print str(error)
 			return {
 		  		"status":"403",
-		  		"message":"Something Went wrong!"
+		  		"message":str(error)
 			}
 
 
@@ -416,7 +416,7 @@ def create_zones(data):
 			print str(error)
 			return {
 				"status":"403",
-				"message":"Something Went wrong!"
+				"message":str(error)
 			}
 
 
@@ -478,7 +478,7 @@ def create_group_church(data):
 			print str(error)
 			return {
 				"status":"403",
-				"message":"Something Went wrong!"
+				"message":str(error)
 			}
 
 
@@ -544,7 +544,7 @@ def create_church(data):
 			print str(error)
 			return {
 				"status":"403",
-				"message":"Something Went wrong!"
+				"message":str(error)
 			}
 
 
@@ -613,7 +613,7 @@ def create_pcf(data):
 			print str(error)
 			return {
 				"status":"403",
-				"message":"Something Went wrong!"
+				"message": str(error)
 			}
 
 	
@@ -689,7 +689,7 @@ def create_senior_cells(data):
 			print str(error)
 			return {
 				"status":"403",
-				"message":"Something Went wrong!"
+				"message":str(error)
 			}	
 		# except Exception as e :
 		# 	exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -753,7 +753,7 @@ def create_cells(data):
 			print str(error)
 			return {
 				"status":"403",
-				"message":"Something Went wrong!"
+				"message":str(error)
 			}
 		                
 
@@ -2421,7 +2421,7 @@ def get_hierarchy(data):
         "Senior Cells":"senior_cell_code,senior_cell_name,pcf,pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
         "PCFs":"pcf_code,pcf_name,church,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
         "Churches":"church_code,church_name,church_group,group_church_name,zone,zone_name,region,region_name",
-        "Group Churches":"church_group_code,church_group,zone,zone_name,region,region_name",
+        "Group Churches":"church_group_code,name as church_group,zone,zone_name,region,region_name",
         "Zones":"zone_code,zone_name,region,region_name"
     }
     tablename=dts['tbl']
